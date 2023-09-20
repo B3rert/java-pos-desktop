@@ -5,6 +5,12 @@
  */
 package prin;
 
+import config.conexion;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.swing.JOptionPane;
 
 /**
@@ -12,6 +18,12 @@ import javax.swing.JOptionPane;
  * @author dsdev
  */
 public class login extends javax.swing.JFrame {
+
+    conexion con1 = new conexion();
+    Connection conet;
+    Statement st;
+    ResultSet rs;
+    int idc;
 
     /**
      * Creates new form login
@@ -119,43 +131,52 @@ public class login extends javax.swing.JFrame {
             return;
         }
 
-        //Sección 3
-        if (user.equals("admin") && pass.equals("123")) {
+        try {
+            conet = con1.getConnection();
 
-            //S3 línea 1
-            this.dispose();
+            // Consulta para verificar las credenciales del usuario
+            String sql = "SELECT id FROM usuarios WHERE usuario = ? AND clave = ?";
 
-            //S3 línea 2
-            JOptionPane.showMessageDialog(null, "Bienvenido\n Has ingresado "
-                    + "satisfactoriamente al sistema", "Mensaje de bienvenida",
-                    JOptionPane.INFORMATION_MESSAGE);
+            try (PreparedStatement pstmt = conet.prepareStatement(sql)) {
+                pstmt.setString(1, user);
+                pstmt.setString(2, pass);
 
-            //S3 línea 3
-            home formformulario1 = new home();
+                ResultSet resultSet = pstmt.executeQuery();
 
-            //S3 línea 4
-            formformulario1.setVisible(true);
+                if (resultSet.next()) {
+                    // Las credenciales son correctas, el usuario existe en la base de datos
+                    int userId = resultSet.getInt("id");
+                    //S3 línea 1
+                    this.dispose();
 
-        } else {
+                    //S3 línea 3
+                    home formformulario1 = new home();
 
-            //S3 línea 5
-            JOptionPane.showMessageDialog(null, "Acceso denegado:\n"
-                    + "Por favor ingrese un usuario y/o contraseña correctos",
-                    "Acceso denegado", JOptionPane.ERROR_MESSAGE);
-
+                    //S3 línea 4
+                    formformulario1.setVisible(true);
+                } else {
+                    // Las credenciales son incorrectas, el usuario no existe o la contraseña es incorrecta
+                    JOptionPane.showMessageDialog(null, "Acceso denegado:\n"
+                            + "Por favor ingrese un usuario y/o contraseña correctos",
+                            "Acceso denegado", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        
-                    this.dispose();
 
-         //S3 línea 3
-            NewUser formformulario1 = new NewUser();
+        this.dispose();
 
-            //S3 línea 4
-            formformulario1.setVisible(true);
+        //S3 línea 3
+        NewUser formformulario1 = new NewUser();
+
+        //S3 línea 4
+        formformulario1.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
