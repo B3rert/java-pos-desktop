@@ -72,6 +72,7 @@ public class Pos extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         lblTotal = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
+        btnNew = new javax.swing.JButton();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -251,6 +252,13 @@ public class Pos extends javax.swing.JFrame {
 
         jLabel7.setText("Codigo producto");
 
+        btnNew.setText("Nuevo documento");
+        btnNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNewActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -259,23 +267,27 @@ public class Pos extends javax.swing.JFrame {
                 .addGap(37, 37, 37)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addComponent(btnBack)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnConfirm))
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(btnSearch))))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(btnNew)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(btnBack)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnConfirm))
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearch)))))
                 .addGap(0, 50, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(30, Short.MAX_VALUE)
+                .addContainerGap(16, Short.MAX_VALUE)
+                .addComponent(btnNew)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -373,12 +385,30 @@ public class Pos extends javax.swing.JFrame {
                             pstmtTransaccion.executeUpdate();
 
                             System.out.println("Registro en transacciones insertado correctamente para el producto con código: " + codigoProducto);
+
+                            // Después de insertar la transacción en la tabla "transacciones"
+// Restar la cantidad vendida de las existencias del producto en la tabla "productos"
+                            String updateExistenciasSQL = "UPDATE productos SET CANTIDADPRODUCTO = CANTIDADPRODUCTO - ? WHERE CODIGOPRODUCTO = ?";
+
+                            try (PreparedStatement pstmtUpdateExistencias = conet.prepareStatement(updateExistenciasSQL)) {
+                                pstmtUpdateExistencias.setInt(1, cantidadVendida); // Resta la cantidad vendida
+                                pstmtUpdateExistencias.setString(2, codigoProducto); // Producto afectado
+
+                                int filasActualizadas = pstmtUpdateExistencias.executeUpdate();
+
+                                if (filasActualizadas > 0) {
+                                    System.out.println("Existencias actualizadas correctamente para el producto con código: " + codigoProducto);
+                                } else {
+                                    System.out.println("No se encontró el producto con código: " + codigoProducto);
+                                }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
                         }
                     }
-                    
-                                JOptionPane.showMessageDialog(this, "Documento creado corretammente");
-                                
-                                
+
+                    JOptionPane.showMessageDialog(this, "Documento creado corretammente");
 
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -466,6 +496,28 @@ public class Pos extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnAddActionPerformed
 
+    private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
+
+        while (modelo.getRowCount() > 0) {
+            modelo.removeRow(0);
+        }
+
+        txtSearch.setText("");
+        txtSearch.requestFocus();
+
+        txtCode.setText("");
+        txtExistencia.setText("");
+        txtPrecio.setText("");
+        txtName.setText("");
+
+        txtCantidad.setText("1");
+        txtCantidad.setEditable(false);
+        btnAdd.setEnabled(false);
+        btnConfirm.setEnabled(false);
+
+
+    }//GEN-LAST:event_btnNewActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -528,6 +580,7 @@ public class Pos extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnConfirm;
+    private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSearch;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
