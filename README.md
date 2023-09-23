@@ -109,5 +109,5 @@ Permite visualizar todos los productos del inventario.
 
 ## Librerias externas utilizadas.
 
-* [iTextPDF 12.5.5](https://github.com/itext/itextpdf/releases)
+* [iText 5.5.12](https://github.com/itext/itextpdf/releases)
 
